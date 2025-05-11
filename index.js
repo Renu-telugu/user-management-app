@@ -9,14 +9,14 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const config = require('./config');
 
-// Middleware setup
+// Setting up middleware 
 app.use(methodOverride('_method'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set("views", path.join(__dirname, "views"));
 
-// Session and flash setup
+// Added session management - helps with user feedback
 app.use(session({
   secret: 'deltaappsecret',
   resave: false,
@@ -48,7 +48,7 @@ function createConnection() {
   // Create new connection
   connection = mysql.createConnection(config.db);
   
-  // Handle connection errors
+  // Had some issues with dropped connections, this fixes it
   connection.on('error', (err) => {
     console.error('Database connection error:', err);
     if (err.code === 'PROTOCOL_CONNECTION_LOST') {
@@ -63,7 +63,7 @@ function createConnection() {
 // Initialize connection
 createConnection();
 
-// Helper functions
+// Helper to generate random user data
 const getRandomUser = () => {
   return [
     faker.string.uuid(),
@@ -73,7 +73,7 @@ const getRandomUser = () => {
   ];
 };
 
-// Async query function to use promises instead of callbacks
+// Made this to avoid callback hell
 const queryAsync = (sql, params) => {
   return new Promise((resolve, reject) => {
     connection.query(sql, params, (err, result) => {
@@ -83,20 +83,18 @@ const queryAsync = (sql, params) => {
   });
 };
 
-// Hash password
+// For hashing passwords - security first!
 const hashPassword = async (password) => {
   const saltRounds = 10;
   return await bcrypt.hash(password, saltRounds);
 };
 
-// Compare password
+// To check passwords during login/verification
 const comparePassword = async (password, hash) => {
   return await bcrypt.compare(password, hash);
 };
 
-// Routes
-
-// Home
+// Home page
 app.get("/", async (req, res) => {
   try {
     const result = await queryAsync("SELECT count(*) FROM user", []);
@@ -109,7 +107,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Show all users
+// Show all users in a table
 app.get("/user", async (req, res) => {
   try {
     const users = await queryAsync("SELECT * FROM user", []);
@@ -121,7 +119,7 @@ app.get("/user", async (req, res) => {
   }
 });
 
-// Edit form
+// Edit user form
 app.get("/user/:id/edit/", async (req, res) => {
   const { id } = req.params;
   try {
@@ -141,7 +139,7 @@ app.get("/user/:id/edit/", async (req, res) => {
   }
 });
 
-// Update user
+// Update user - PATCH method
 app.patch("/user/:id", async (req, res) => {
   const { id } = req.params;
   const { password: formPass, username: newUsername } = req.body;
@@ -157,7 +155,7 @@ app.patch("/user/:id", async (req, res) => {
     
     const user = result[0];
     
-    // Verify password
+    // Check if password is correct
     const passwordMatch = await comparePassword(formPass, user.password);
     
     if (!passwordMatch) {
@@ -165,7 +163,7 @@ app.patch("/user/:id", async (req, res) => {
       return res.redirect(`/user/${id}/edit`);
     }
     
-    // Update username
+    // Update the username
     await queryAsync("UPDATE user SET username = ? WHERE id = ?", [newUsername, id]);
     
     req.flash('success_msg', 'Username updated successfully');
@@ -177,26 +175,26 @@ app.patch("/user/:id", async (req, res) => {
   }
 });
 
-// Show add user form
+// Form to add new user
 app.get("/user/new", (req, res) => {
   res.render("adduser.ejs");
 });
 
-// Add new user
+// Process the new user form
 app.post("/user/new", async (req, res) => {
   const { username, email, password } = req.body;
   
   try {
-    // Input validation
+    // Make sure we have all fields
     if (!username || !email || !password) {
       req.flash('error_msg', 'All fields are required');
       return res.redirect('/user/new');
     }
     
-    // Hash password
+    // Hash password for security
     const hashedPassword = await hashPassword(password);
     
-    // Insert user
+    // Insert the new user
     await queryAsync(
       "INSERT INTO user (id, username, email, password) VALUES (?, ?, ?, ?)",
       [faker.string.uuid(), username, email, hashedPassword]
@@ -211,7 +209,7 @@ app.post("/user/new", async (req, res) => {
   }
 });
 
-// Delete form
+// Delete user form
 app.get("/user/:id/delete/", async (req, res) => {
   const { id } = req.params;
   
@@ -232,13 +230,13 @@ app.get("/user/:id/delete/", async (req, res) => {
   }
 });
 
-// Delete user
+// Process user deletion
 app.delete("/user/:id", async (req, res) => {
   const { id } = req.params;
   const { password: formPass, email: formEmail } = req.body;
   
   try {
-    // Get user
+    // Find the user first
     const result = await queryAsync("SELECT * FROM user WHERE id = ?", [id]);
     
     if (result.length === 0) {
@@ -248,7 +246,7 @@ app.delete("/user/:id", async (req, res) => {
     
     const user = result[0];
     
-    // Verify credentials
+    // Double-check credentials for security
     const passwordMatch = await comparePassword(formPass, user.password);
     
     if (!passwordMatch) {
@@ -259,7 +257,7 @@ app.delete("/user/:id", async (req, res) => {
       return res.redirect(`/user/${id}/delete`);
     }
     
-    // Delete user
+    // Delete the user
     await queryAsync("DELETE FROM user WHERE id = ?", [id]);
     
     req.flash('success_msg', 'User deleted successfully');
@@ -274,18 +272,18 @@ app.delete("/user/:id", async (req, res) => {
 // Start server
 const port = process.env.PORT || config.app.port || 3000;
 
-// Check if this is being run directly or imported as a module (for serverless)
+// Check if running directly or imported
 if (require.main === module) {
   // Running directly (local development)
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
 } else {
-  // Being imported (serverless environment)
-  console.log('Exporting app for serverless deployment');
+  // Being imported (for deployment)
+  console.log('Exporting app for deployment');
 }
 
-// Export the Express app for serverless environments
+// Export for deployment
 module.exports = app;
 
 // try{

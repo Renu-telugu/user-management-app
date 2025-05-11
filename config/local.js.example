@@ -1,10 +1,16 @@
-// Local configuration - copy to local.js and fill in your values
-// DO NOT commit local.js to GitHub
+// Example of what your local.js should look like
+// Copy this file to local.js and fill in your actual values
+// DO NOT commit local.js to version control - it has your passwords!
+
 module.exports = {
   db: {
     host: 'localhost',
-    user: 'root',
+    user: 'root',  // Default MySQL user
     database: 'delta_app',
-    password: 'your-password-here'
+    password: 'your-password-here',  // Your actual MySQL password
+    // Uncomment below if you need SSL
+    // ssl: {
+    //   rejectUnauthorized: true
+    // }
   }
 }; 
