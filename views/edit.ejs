@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User | User Management</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    
+    <div class="container">
+        <% if(error_msg.length > 0){ %>
+            <div class="alert alert-danger">
+                <%= error_msg %>
+            </div>
+        <% } %>
+        
+        <div class="card">
+            <h1 class="card-title">Edit User</h1>
+            <div class="mb-3">
+                <p><strong>Email:</strong> <%= user.email %></p>
+            </div>
+            
+            <form method="POST" action="/user/<%= user.id %>?_method=PATCH">
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="form-control" 
+                        value="<%= user.username %>"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-control" 
+                        placeholder="Enter your password to confirm"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">Update Username</button>
+                    <a href="/user" class="btn">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="/js/main.js"></script>
+</body>
+</html>

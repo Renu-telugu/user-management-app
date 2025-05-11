@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    
+    <div class="container">
+        <% if(success_msg.length > 0){ %>
+            <div class="alert alert-success">
+                <%= success_msg %>
+            </div>
+        <% } %>
+        
+        <% if(error_msg.length > 0){ %>
+            <div class="alert alert-danger">
+                <%= error_msg %>
+            </div>
+        <% } %>
+        
+        <div class="card">
+            <h1 class="card-title text-center">Welcome to User Management System</h1>
+            <p class="text-center mb-3">Manage your users with ease using our simple and efficient system.</p>
+            
+            <div class="text-center">
+                <div class="mb-3">
+                    <h2>Current User Count: <span class="count-badge"><%= count %></span></h2>
+                </div>
+                
+                <a href="/user" class="btn mb-2">View All Users</a>
+                <a href="/user/new" class="btn btn-success">Add New User</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/main.js"></script>
+</body>
+</html>

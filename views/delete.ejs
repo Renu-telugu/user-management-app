@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete User | User Management</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    
+    <div class="container">
+        <% if(error_msg.length > 0){ %>
+            <div class="alert alert-danger">
+                <%= error_msg %>
+            </div>
+        <% } %>
+        
+        <div class="card">
+            <h1 class="card-title">Delete User</h1>
+            
+            <div class="alert alert-danger mb-3">
+                <p><strong>Warning:</strong> You are about to delete user: <strong><%= user.username %></strong></p>
+                <p>This action cannot be undone. Please confirm your credentials to continue.</p>
+            </div>
+            
+            <form method="POST" action="/user/<%= user.id %>?_method=DELETE">
+                <div class="form-group">
+                    <label for="email" class="form-label">Confirm Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-control" 
+                        placeholder="Enter user email to confirm"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-control" 
+                        placeholder="Enter password to confirm"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger delete-btn">Delete User</button>
+                    <a href="/user" class="btn">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="/js/main.js"></script>
+</body>
+</html>
